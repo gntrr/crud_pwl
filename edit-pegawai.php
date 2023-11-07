@@ -1,54 +1,44 @@
 <?php
-require_once('koneksi.php');
+    // Include Library
+    require_once('library.php');
 
-// Mengecek apakah form telah disubmit
-if(isset($_POST['create'])) {
-    // Menangkap data post
-    $id_pegawai = $_POST['id_pegawai'];
-    $nama_pegawai = $_POST['nama_pegawai'];
-    $tgl_lahir = $_POST['tgl_lahir'];
-    $foto = $_POST['foto'];
-    $keterangan = $_POST['keterangan'];
-    $id_jabatan = $_POST['id_jabatan'];
+    // Menampilkan data pegawai berdasarkan id pegawai
+    $id = $_GET['id'];
 
-    // Menyiapkan array data
-    $data = array(
-        ':id_pegawai' => $id_pegawai,
-        ':nama_pegawai' => $nama_pegawai,
-        ':tgl_lahir' => $tgl_lahir,
-        ':foto' => $foto,
-        ':keterangan' => $keterangan,
-        ':id_jabatan' => $id_jabatan
-    );
+    // Ambil data pegawai berdasarkan id pegawai
+    $hasil = readPegawaiWithJabatan($id);
 
-    // Menyusun query SQL UPDATE
-    $sql = 'UPDATE pegawai SET nama_pegawai = :nama_pegawai, tgl_lahir = :tgl_lahir, foto = :foto, keterangan = :keterangan, id_jabatan = :id_jabatan WHERE id_pegawai = :id_pegawai';
+    $foto = $hasil['foto']; // Menggunakan foto yang ada sebelumnya sebagai default
 
-    // Menyiapkan pernyataan PDO
-    $row = $pdo->prepare($sql);
+    if (isset($_POST['create'])) {
+        $id_pegawai = $_POST['id_pegawai'];
+        $nama_pegawai = $_POST['nama_pegawai'];
+        $tgl_lahir = $_POST['tgl_lahir'];
+        $keterangan = $_POST['keterangan'];
+        $id_jabatan = $_POST['id_jabatan'];
 
-    // Mengeksekusi pernyataan dengan parameter
-    $row->execute($data);
+        // Periksa apakah ada file foto yang diunggah
+        if ($_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+            // File foto baru diunggah
+            $upload_directory = 'uploads/';
+            $foto = $_FILES['foto']['name'];
+            $foto_tmp = $_FILES['foto']['tmp_name'];
 
-    // Redirect ke halaman utama
-    echo '<script>alert("Berhasil Edit Data Pegawai");window.location="index.php"</script>';
-}
+            // Pindahkan file foto baru ke folder upload
+            move_uploaded_file($foto_tmp, $upload_directory . $foto);
+        }
 
-// Ambil data jabatan dari tabel "jabatan"
-$sql_jabatan = "SELECT id_jabatan, nama_jabatan FROM jabatan";
-$row_jabatan = $pdo->prepare($sql_jabatan);
-$row_jabatan->execute();
-$hasil_jabatan = $row_jabatan->fetchAll();
+        // Panggil fungsi updatePegawai() untuk mengupdate data pegawai
+        updatePegawai($id_pegawai, $nama_pegawai, $tgl_lahir, $foto, $keterangan, $id_jabatan);
 
-// Menampilkan data pegawai berdasarkan id pegawai
-$id = $_GET['id'];
+        // Redirect ke halaman utama
+        echo '<script>alert("Berhasil Edit Data Pegawai");window.location="index.php"</script>';
+    }
 
-// Mengeksekusi query dengan parameter
-$sql = "SELECT * FROM pegawai WHERE id_pegawai = :id";
-$row = $pdo->prepare($sql);
-$row->execute(array(':id' => $id));
-$hasil = $row->fetch();
+    // Ambil data jabatan dari tabel "jabatan"
+    $hasil_jabatan = readJabatan();
 ?>
+
 
 <!DOCTYPE HTML>
 <html>
@@ -64,7 +54,7 @@ $hasil = $row->fetch();
     <br/>
     <div class="row">
         <div class="col-lg-6">
-            <form action="" method="POST">
+            <form action="" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label>Nama Pegawai</label>
                     <input type="text" value="<?php echo $hasil['nama_pegawai']; ?>" class="form-control" name="nama_pegawai">
@@ -75,7 +65,12 @@ $hasil = $row->fetch();
                 </div>
                 <div class="form-group">
                     <label>Foto</label>
-                    <input type="file" value="<?php echo $hasil['foto']; ?>" class="form-control" name="foto">
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="customFile" name="foto">
+                            <label class="custom-file-label" for="customFile"><?php echo $foto; ?></label>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Keterangan</label>

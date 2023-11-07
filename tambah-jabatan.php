@@ -1,21 +1,16 @@
 <?php
-require_once('koneksi.php');
+	// Include Library
+	require_once('library.php');
 
-	// berikut script untuk proses tambah pegawai ke database 
-	if(!empty($_POST['nama_jabatan'])){
-		// menangkap data post 
+	// Jika user mengklik tombol Tambah (Create)
+	if (isset($_POST['create'])) {
 		$nama_jabatan = $_POST['nama_jabatan'];
 		
-		$data[] = $nama_jabatan;
+		// Panggil fungsi createJabatan() untuk menambah data jabatan
+		createJabatan($nama_jabatan);
 		
-		// simpan data jabatan
-		
-		$sql = 'INSERT INTO jabatan (nama_jabatan)VALUES (?)';
-		$row = $pdo->prepare($sql);
-		$row->execute($data);
-		
-		// redirect
-		echo '<script>alert("Berhasil Tambah Jabatan");window.location="jabatan.php"</script>';
+		// Berikan notifikasi ketika jabatan berhasil ditambahkan
+		echo '<script>alert("Berhasil Tambah Data Jabatan");window.location="jabatan.php"</script>';
 	}
 ?>
 <!DOCTYPE HTML>

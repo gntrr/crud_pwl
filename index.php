@@ -1,5 +1,20 @@
 <?php
-	require_once('koneksi.php');
+	// Include library
+	require_once('library.php');
+
+	// Mendapatkan data pegawai dan jabatan dari library
+	$hasil = readPegawaiWithJabatan();
+
+	// Jika user mengklik tombol Hapus (delete)
+	if (isset($_GET['delete_idPegawai'])) {
+		$delete_idPegawai = $_GET['delete_idPegawai'];
+	
+		// Panggil fungsi deletePegawai dari library.php untuk menghapus pegawai
+		deletePegawai($delete_idPegawai);
+
+		// Berikan notifikasi ketika pegawai berhasil dihapus
+		echo '<script>alert("Berhasil Hapus Data Pegawai");window.location="index.php"</script>';
+	}	
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -12,12 +27,7 @@
 		<div class="container">
             <br>
             <h1>Tugas Membuat CRUD Native PHP dengan PDO MySQL</h1>
-            <p>Kelompok: <br>
-                1. Afidz Bangun Prastya <br>
-                2. Zaky Luthfirana Roihan Nafi' <br>
-                3. Wima Alif Harianto <br>
-                4. Ryan Erlangga Ardyansyah <br>
-                5. Danang Suminar Dwi Cahyo <br>
+            <p>By kelompok 2 <br>
             </p>
 			<div class="row">
 				 <div class="col-lg-12">
@@ -35,31 +45,23 @@
 						<th style="text-align: center;">Actions</th>
 					</tr>
 					 <?php
-						$sql = "SELECT pegawai.*, jabatan.nama_jabatan FROM pegawai
-                        INNER JOIN jabatan ON pegawai.id_jabatan = jabatan.id_jabatan";
-						$row = $pdo->prepare($sql);
-						$row->execute();
-						$hasil = $row->fetchAll();
-
-						$a =1;
 						foreach($hasil as $isi){
 					 ?>
 					<tr>
-						<td><?php echo $a ?></td>
+						<td><?php echo $isi['id_pegawai'];?></td>
 						<td><?php echo $isi['nama_pegawai'];?></td>
 						<td><?php echo $isi['tgl_lahir'];?></td>
-						<td><?php echo $isi['foto'];?></td>
+						<td><img src="uploads/<?php echo ($isi['foto']); ?>" width="100" height="100" /></td>
                         <td><?php echo $isi['keterangan'];?></td>
                         <td><?php echo $isi['nama_jabatan'];?></td>
 						<td style="text-align: center;">
 							<a href="edit-pegawai.php?id=<?php echo $isi['id_pegawai'];?>" class="btn btn-success btn-md">
 							<span class="fa fa-edit"></span></a>
-							<a onclick="return confirm('Apakah yakin ingin menghapus data ini?')" href="hapus-pegawai.php?id=<?php echo $isi['id_pegawai'];?>" 
-							class="btn btn-danger btn-md"><span class="fa fa-trash"></span></a>
+							<a onclick="return confirm('Apakah yakin ingin menghapus data ini?')" href="?delete_idPegawai=<?php echo $isi['id_pegawai'];?>" 
+   							class="btn btn-danger btn-md"><span class="fa fa-trash"></span></a>
 						</td>
 					</tr>
 					<?php
-						$a++;
 						}
 					?>
 				 </table>

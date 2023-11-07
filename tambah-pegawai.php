@@ -1,31 +1,29 @@
 <?php
-require_once('koneksi.php');
+require_once('library.php');
 
 if (!empty($_POST['nama_pegawai'])) {
     $nama_pegawai = $_POST['nama_pegawai'];
     $tgl_lahir = $_POST['tgl_lahir'];
-    $foto = $_POST['foto'];
     $keterangan = $_POST['keterangan'];
     $id_jabatan = $_POST['id_jabatan'];
 
-    $data[] = $nama_pegawai;
-    $data[] = $tgl_lahir;
-    $data[] = $foto;
-    $data[] = $keterangan;
-    $data[] = $id_jabatan;
+    // Proses upload foto
+    $foto = $_FILES['foto']['name'];
+    $foto_tmp = $_FILES['foto']['tmp_name'];
+    $upload_directory = 'uploads/'; // Nama folder upload
 
-    $sql = 'INSERT INTO pegawai (nama_pegawai, tgl_lahir, foto, keterangan, id_jabatan) VALUES (?, ?, ?, ?, ?)';
-    $row = $pdo->prepare($sql);
-    $row->execute($data);
+    if (move_uploaded_file($foto_tmp, $upload_directory . $foto)) {
+        // Panggil fungsi createPegawai untuk membuat data pegawai baru
+        createPegawai($nama_pegawai, $tgl_lahir, $foto, $keterangan, $id_jabatan);
 
-    echo '<script>alert("Berhasil Tambah Data Pegawai");window.location="index.php"</script>';
+        echo '<script>alert("Berhasil Tambah Data Pegawai");window.location="index.php"</script>';
+    } else {
+        echo "Gagal mengunggah foto.";
+    }
 }
 
-// Ambil data jabatan dari tabel "jabatan"
-$sql_jabatan = "SELECT id_jabatan, nama_jabatan FROM jabatan";
-$row_jabatan = $pdo->prepare($sql_jabatan);
-$row_jabatan->execute();
-$hasil_jabatan = $row_jabatan->fetchAll();
+// Ambil data jabatan dari tabel "jabatan" dengan class
+$hasil_jabatan = readJabatan();
 ?>
 
 <!DOCTYPE HTML>
@@ -42,7 +40,7 @@ $hasil_jabatan = $row_jabatan->fetchAll();
     <br/>
     <div class="row">
         <div class="col-lg-6">
-            <form action="" method="POST">
+            <form action="" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label>Nama Pegawai</label>
                     <input type="text" value="" class="form-control" name="nama_pegawai">

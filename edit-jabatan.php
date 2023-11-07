@@ -1,31 +1,19 @@
 <?php
-require_once('koneksi.php');
+require_once('library.php');
 
-if (isset($_POST['create'])) {
+// Menampilkan data jabatan berdasarkan id jabatan
+$id = $_GET['id'];
+$hasil = readJabatanById($id);
+
+if (isset($_POST['update'])) {
     $id_jabatan = $_POST['id_jabatan'];
     $nama_jabatan = $_POST['nama_jabatan'];
 
-    // Perbarui data jabatan berdasarkan ID
-    $sql = 'UPDATE jabatan SET nama_jabatan = :nama_jabatan WHERE id_jabatan = :id_jabatan';
-    $row = $pdo->prepare($sql);
-    $row->execute(array(':nama_jabatan' => $nama_jabatan, ':id_jabatan' => $id_jabatan));
+    // Perbarui data jabatan dengan memanggil fungsi updateJabatan
+    updateJabatan($id_jabatan, $nama_jabatan);
 
     // Redirect ke halaman jabatan
     echo '<script>alert("Berhasil Edit Jabatan");window.location="jabatan.php"</script>';
-}
-
-$id_jabatan = $_GET['id']; // Ambil ID jabatan yang akan diubah
-
-// Ambil data jabatan dari tabel "jabatan" berdasarkan ID
-$sql_jabatan = "SELECT id_jabatan, nama_jabatan FROM jabatan WHERE id_jabatan = :id_jabatan";
-$row_jabatan = $pdo->prepare($sql_jabatan);
-$row_jabatan->execute(array(':id_jabatan' => $id_jabatan));
-$hasil = $row_jabatan->fetch(); // Ambil data jabatan
-
-if (!$hasil) {
-    // Handle jika ID jabatan tidak ditemukan
-    echo 'Jabatan tidak ditemukan';
-    exit;
 }
 ?>
 
@@ -49,7 +37,7 @@ if (!$hasil) {
                     <input type="text" value="<?php echo $hasil['nama_jabatan']; ?>" class="form-control" name="nama_jabatan">
                 </div>
                 <input type="hidden" value="<?php echo $hasil['id_jabatan']; ?>" name="id_jabatan">
-                <button class="btn btn-primary btn-md" name="create"><i class="fa fa-edit"> </i> Update</button>
+                <button class="btn btn-primary btn-md" name="update"><i class="fa fa-edit"> </i> Update</button>
             </form>
         </div>
     </div>
